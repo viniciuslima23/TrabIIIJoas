@@ -1,0 +1,35 @@
+from numba import cuda
+import numpy 
+
+@cuda.jit
+def my_kernel( a, b, c, tamanho):
+
+    lin = cuda.threadIdx.x
+    col = cuda.blockIdx.x
+    soma = 0
+    aux = 0
+    
+    if lin < tamanho and col < tamanho:
+      for aux in range(tamanho):
+        soma = soma + a[lin][aux] * b[aux][col]
+      c[lin][col] = soma
+
+# vetor com números
+matriz_a = [[2, 3], [1, 0]]
+a = numpy.array(matriz_a)
+matriz_b = [[3, 1], [2, 4]]
+b = numpy.array(matriz_b)
+matriz_c = [[0, 0], [0, 0]]
+c = numpy.array(matriz_c)
+
+# números de threads por bloco
+threads_per_block = 32
+
+# número de blocos por grid
+blocks_per_grid = (2 + (threads_per_block - 1) )
+
+# iniciando o kernel
+my_kernel[blocks_per_grid, threads_per_block](a, b, c, 2)
+
+print("\n")
+print(c)
